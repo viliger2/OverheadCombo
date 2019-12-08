@@ -161,10 +161,9 @@ end
 
 local function EventHandler(self, event, sender, ...)
 
-	if sender == "OverheadCombo" and event == "ADDON_LOADED" then
+	if (event == "PLAYER_ENTERING_WORLD") then
 		OverheadCombo_CreateTextures()
 		OverheadCombo_UpdateMax()
-		OCFrame:UnregisterEvent("ADDON_LOADED")
 	elseif event == "UNIT_POWER_FREQUENT" then
 		-- TODO: wait for blizzard to fix this shit
 		-- Lets imagine a scenario where you, as a rogue, have two targets on you at the same time
@@ -186,9 +185,9 @@ OCFrame:SetWidth(60)
 OCFrame:SetHeight(12)
 OCFrame:SetPoint("CENTER", UIParent, "CENTER")
 
-OCFrame:RegisterEvent("ADDON_LOADED")
 OCFrame:RegisterEvent("NAME_PLATE_UNIT_ADDED")
 OCFrame:RegisterEvent("NAME_PLATE_UNIT_REMOVED")
+OCFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 OCFrame:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player");
 OCFrame:RegisterUnitEvent("UNIT_MAXPOWER", "player");
 
