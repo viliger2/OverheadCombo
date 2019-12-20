@@ -1,7 +1,7 @@
-## Interface: 11302
+## Interface: 11303
 ## Title: OverheadCombo
 ## Notes: Adds combopoints to nameplates
 ## Author: Viliger
-## Version: 1.0.0
+## Version: 1.0.2
 
 OverheadCombo.lua
