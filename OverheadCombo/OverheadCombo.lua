@@ -4,6 +4,11 @@
 -- 2. I am thinking about adding green-yellow-red indication for 1,2-3,4-5 points
 --	  Basically a traffic light-like option for combopoints
 
+local pClass = select(2, UnitClass("player"))
+if (pClass ~= "ROGUE" and pClass ~= "DRUID") then
+	return
+end
+
 local COMBO_POINT_SIZE = 12 -- size of a single point
 local COMBO_POINT_SPACING = 3 -- spacing between points
 
@@ -75,6 +80,7 @@ local function OverheadCombo_ShowComboPoints(comboPointsOwner)
 				UIFrameFadeIn(comboPoint.Highlight, COMBOFRAME_HIGHLIGHT_FADE_IN, 0, 1)
 			end
 		else
+			comboPoint.Highlight:SetAlpha(0)
 		end
 	end
 	
@@ -106,6 +112,7 @@ local function OverheadCombo_updateComboPoints()
 	-- if anyone of the units with nameplates have combopoints
 	for i, nameplate in ipairs(nameplatesArray) do
 		local nameplateComboPoints = GetComboPoints("player", nameplate.namePlateUnitToken)
+		--print(nameplate.namePlateUnitToken, nameplateComboPoints)
 		if nameplateComboPoints > 0 then
 			comboPointsOwner = {}
 			comboPointsOwner.nameplate = nameplate
@@ -135,7 +142,7 @@ local function OverheadCombo_updateComboPoints()
 
 end
 
--- updates maximum combo points of unit and generally initilazes everything we need at the login
+-- updates maximum combo points of unit and generally initializes everything we need at the login
 local function OverheadCombo_UpdateMax()
 
 	OCFrame.maxComboPoints = UnitPowerMax("player", Enum.PowerType.ComboPoints)
@@ -145,7 +152,7 @@ local function OverheadCombo_UpdateMax()
 
 end
 
--- creating each combo point as a frame, usning ComboPointTemplate template
+-- creating each combo point as a frame, using ComboPointTemplate template
 -- template gives us exactly the same style of combopoints as ones used on Blizzard target frame
 local function OverheadCombo_CreateTextures()
 
@@ -159,24 +166,28 @@ local function OverheadCombo_CreateTextures()
 
 end
 
-local function EventHandler(self, event, sender, ...)
-
+local function EventHandler(self, event, sender, arg2, ...)
 	if (event == "PLAYER_ENTERING_WORLD") then
 		OverheadCombo_CreateTextures()
 		OverheadCombo_UpdateMax()
-	elseif event == "UNIT_POWER_FREQUENT" then
+	elseif event == "UNIT_POWER_UPDATE" or event == "UNIT_POWER_FREQUENT" then
 		-- TODO: wait for blizzard to fix this shit
 		-- Lets imagine a scenario where you, as a rogue, have two targets on you at the same time
 		-- So you Gouge one via mouseover macro and after that somehow (via Sinister or something) gain combopoint on your main one
 		-- event UNIT_POWER_FREQUENT with unit COMBO_POINTS is not fired until you gain more combopoints than your mouseover target
 		-- so instead of tracking events with unit COMBO_POINTS we just expect you to gain combo points on energy consumption
 		-- it uses more CPU cycles and makes combo frames flicker but there is nothing I can do (I think)
-		-- local unit = ...;
-		-- if unit == "COMBO_POINTS" then
+		--
+		-- EDIT: As of 2022-06-27 this seems to now work properly (client version 2.5.4.44171 tbc-classic)  
+		--        - @kebabstorm
+		--
+		if arg2 == "COMBO_POINTS" then
 			OverheadCombo_updateComboPoints()
-		-- end
+		end
 	elseif event == "NAME_PLATE_UNIT_ADDED" or event == "NAME_PLATE_UNIT_REMOVED" then
 		OverheadCombo_updateComboPoints()
+	elseif event == "UNIT_MAXPOWER" then
+		OverheadCombo_UpdateMax()
 	end
 end
 
@@ -188,6 +199,7 @@ OCFrame:SetPoint("CENTER", UIParent, "CENTER")
 OCFrame:RegisterEvent("NAME_PLATE_UNIT_ADDED")
 OCFrame:RegisterEvent("NAME_PLATE_UNIT_REMOVED")
 OCFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+OCFrame:RegisterUnitEvent("UNIT_POWER_UPDATE", "player");
 OCFrame:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player");
 OCFrame:RegisterUnitEvent("UNIT_MAXPOWER", "player");
 
