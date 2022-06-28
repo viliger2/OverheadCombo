@@ -1,4 +1,4 @@
-## Interface: 20504
+## Interface: 11403
 ## Title: OverheadCombo
 ## Notes: Adds combopoints to nameplates
 ## Author: Viliger
